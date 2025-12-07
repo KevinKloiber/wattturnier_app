@@ -1,6 +1,16 @@
 import streamlit as st
 import json
 import pandas as pd
+import gspread
+from datetime import datetime
+import os
+
+def get_orders_sheet():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    creds_path = os.path.join(script_dir, "credentials.json")
+    gc = gspread.service_account(filename=creds_path)
+    sh = gc.open("bestellungen_wt")
+    return sh.sheet1
 
 st.set_page_config(page_title="Wattturnier", layout="centered")
 
@@ -116,23 +126,54 @@ with tab2:
         st.write("Noch keine Teams registriert.")
 
 with tab3:
-    st.write("**Speisekarte:**")
+    st.write("**🍺 Bestellung aufgeben:**")
     
-    st.markdown("""
-    ### 🍺 Getränke
-    | Getränk | Preis |
-    |---------|-------|
-    | Bier, Weißbier, Radler | 3,50 € |
-    | Alkoholfreie Getränke | 3,00 € |
-    | Kurze | 2,50 € |
-    | Rüscherl | 5,00 € |
-
+    # Table number
+    tisch_nr = st.text_input("Tischnummer", "")
     
-    ### 🍕 Essen
-    | Speise | Preis |
-    |--------|-------|
-    | Wurstsemmel | 3,00 € |
-    | Pizzastück | 4,50 € |
-    """)
+    st.write("**Getränke:**")
+    col1, col2 = st.columns(2)
+    with col1:
+        bier = st.number_input("Bier (3,50€)", min_value=0, max_value=20, value=0, key="bier")
+        weissbier = st.number_input("Weißbier (3,50€)", min_value=0, max_value=20, value=0, key="weissbier")
+        radler = st.number_input("Radler (3,50€)", min_value=0, max_value=20, value=0, key="radler")
+    with col2:
+        spezi = st.number_input("Spezi (3,00€)", min_value=0, max_value=20, value=0, key="spezi")
+        apfelschorle = st.number_input("Apfelschorle (3,00€)", min_value=0, max_value=20, value=0, key="apfelschorle")
+        wasser = st.number_input("Wasser (3,00€)", min_value=0, max_value=20, value=0, key="wasser")
     
-    st.info("Bestellungen bitte an der Theke/Bedienung aufgeben!")
+    kurze = st.number_input("Kurze (2,50€)", min_value=0, max_value=20, value=0, key="kurze")
+    rüscherl = st.number_input("Rüscherl (5,00€)", min_value=0, max_value=20, value=0, key="ruescherl")
+    
+    st.write("**Essen:**")
+    wurstsemmel = st.number_input("Wurstsemmel (3,00€)", min_value=0, max_value=20, value=0, key="wurstsemmel")
+    pizza = st.number_input("Pizzastück (4,50€)", min_value=0, max_value=20, value=0, key="pizza")
+    
+    if st.button("🛒 Bestellung absenden"):
+        if not tisch_nr:
+            st.error("Bitte Tischnummer eingeben!")
+        else:
+            # Build order string
+            items = []
+            if bier > 0: items.append(f"{bier}x Bier")
+            if weissbier > 0: items.append(f"{weissbier}x Weißbier")
+            if radler > 0: items.append(f"{radler}x Radler")
+            if spezi > 0: items.append(f"{spezi}x Spezi")
+            if apfelschorle > 0: items.append(f"{apfelschorle}x Apfelschorle")
+            if wasser > 0: items.append(f"{wasser}x Wasser")
+            if kurze > 0: items.append(f"{kurze}x Kurze")
+            if rüscherl > 0: items.append(f"{rüscherl}x Rüscherl")
+            if wurstsemmel > 0: items.append(f"{wurstsemmel}x Wurstsemmel")
+            if pizza > 0: items.append(f"{pizza}x Pizza")
+            
+            if not items:
+                st.error("Bitte mindestens einen Artikel auswählen!")
+            else:
+                # Send to Google Sheet
+                sheet = get_orders_sheet()
+                order_id = len(sheet.get_all_values())
+                bestellung = ", ".join(items)
+                zeit = datetime.now().strftime("%H:%M:%S")
+                
+                sheet.append_row([order_id, tisch_nr, bestellung, zeit, "offen"])
+                st.success("✅ Bestellung aufgegeben!")
