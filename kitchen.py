@@ -6,12 +6,18 @@ from datetime import datetime
 st.set_page_config(page_title="Küche - Wattturnier", layout="wide")
 
 def get_orders_sheet():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    creds_path = os.path.join(script_dir, "credentials.json")
-    gc = gspread.service_account(filename=creds_path)
+    try:
+        # Try Streamlit Cloud secrets first
+        creds = st.secrets["gcp_service_account"]
+        gc = gspread.service_account_from_dict(dict(creds))
+    except:
+        # Fall back to local file
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        creds_path = os.path.join(script_dir, "credentials.json")
+        gc = gspread.service_account(filename=creds_path)
+    
     sh = gc.open("bestellungen_wt")
     return sh.sheet1
-
 st.title("🍳 Küche - Bestellungen")
 
 # Refresh button

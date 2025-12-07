@@ -138,6 +138,14 @@ with tab3:
     # Table number
     tisch_nr = st.text_input("Tischnummer", "")
     
+    # Define prices
+    prices = {
+        "bier": 3.50, "weissbier": 3.50, "radler": 3.50,
+        "spezi": 3.00, "apfelschorle": 3.00, "wasser": 3.00,
+        "kurze": 2.50, "ruescherl": 5.00,
+        "wurstsemmel": 3.00, "pizza": 4.50
+    }
+    
     st.write("**Getränke:**")
     col1, col2 = st.columns(2)
     with col1:
@@ -150,17 +158,26 @@ with tab3:
         wasser = st.number_input("Wasser (3,00€)", min_value=0, max_value=20, value=0, key="wasser")
     
     kurze = st.number_input("Kurze (2,50€)", min_value=0, max_value=20, value=0, key="kurze")
-    rüscherl = st.number_input("Rüscherl (5,00€)", min_value=0, max_value=20, value=0, key="ruescherl")
+    ruescherl = st.number_input("Rüscherl (5,00€)", min_value=0, max_value=20, value=0, key="ruescherl")
     
     st.write("**Essen:**")
     wurstsemmel = st.number_input("Wurstsemmel (3,00€)", min_value=0, max_value=20, value=0, key="wurstsemmel")
     pizza = st.number_input("Pizzastück (4,50€)", min_value=0, max_value=20, value=0, key="pizza")
     
+    # Calculate total price
+    total = (bier * prices["bier"] + weissbier * prices["weissbier"] + 
+             radler * prices["radler"] + spezi * prices["spezi"] + 
+             apfelschorle * prices["apfelschorle"] + wasser * prices["wasser"] +
+             kurze * prices["kurze"] + ruescherl * prices["ruescherl"] +
+             wurstsemmel * prices["wurstsemmel"] + pizza * prices["pizza"])
+    
+    if total > 0:
+        st.info(f"💰 Gesamtpreis: {total:.2f} €")
+    
     if st.button("🛒 Bestellung absenden"):
         if not tisch_nr:
             st.error("Bitte Tischnummer eingeben!")
         else:
-            # Build order string
             items = []
             if bier > 0: items.append(f"{bier}x Bier")
             if weissbier > 0: items.append(f"{weissbier}x Weißbier")
@@ -169,18 +186,18 @@ with tab3:
             if apfelschorle > 0: items.append(f"{apfelschorle}x Apfelschorle")
             if wasser > 0: items.append(f"{wasser}x Wasser")
             if kurze > 0: items.append(f"{kurze}x Kurze")
-            if rüscherl > 0: items.append(f"{rüscherl}x Rüscherl")
+            if ruescherl > 0: items.append(f"{ruescherl}x Rüscherl")
             if wurstsemmel > 0: items.append(f"{wurstsemmel}x Wurstsemmel")
             if pizza > 0: items.append(f"{pizza}x Pizza")
             
             if not items:
                 st.error("Bitte mindestens einen Artikel auswählen!")
             else:
-                # Send to Google Sheet
                 sheet = get_orders_sheet()
                 order_id = len(sheet.get_all_values())
                 bestellung = ", ".join(items)
                 zeit = datetime.now().strftime("%H:%M:%S")
+                preis = f"{total:.2f} €"
                 
-                sheet.append_row([order_id, tisch_nr, bestellung, zeit, "offen"])
+                sheet.append_row([order_id, tisch_nr, bestellung, zeit, preis, "offen"])
                 st.success("✅ Bestellung aufgegeben!")
