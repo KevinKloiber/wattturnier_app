@@ -41,30 +41,38 @@ with tab1:
             team_name = f"{name1} - {name2}"
             
             wins = 0
+            losses = 0
             points_for = 0
             points_against = 0
             
-            for m in matches:
+            for m in st.session_state.matches:
                 if "scores" not in m:
                     continue
+                    
                 if m["team1"] == team_num:
                     for sub in m["scores"]:
+                        games_played += 1
                         points_for += sub[0]
                         points_against += sub[1]
                         if sub[0] == 15:
                             wins += 1
+                        else:
+                            losses += 1
                 elif m["team2"] == team_num:
                     for sub in m["scores"]:
+                        games_played += 1
                         points_for += sub[1]
                         points_against += sub[0]
                         if sub[1] == 15:
                             wins += 1
+                        else:
+                            losses += 1
             
             standings.append({
                 "Platz": 0,
                 "Team": team_num,
                 "Name": team_name,
-                "Spiele": f"{wins}:{9-wins}",
+                "Spiele": f"{wins}:{losses}",
                 "Punkte": f"{points_for}:{points_against}",
                 "wins": wins,
                 "pf": points_for,
@@ -76,7 +84,7 @@ with tab1:
             s["Platz"] = i + 1
         
         df_standings = pd.DataFrame(standings)[["Platz", "Team", "Name", "Spiele", "Punkte"]]
-        st.table(df_standings)
+        st.table(df_standings.set_index("Platz"))
     else:
         st.write("Noch keine Daten vorhanden.")
 
