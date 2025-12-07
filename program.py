@@ -261,5 +261,39 @@ with tab5:
         # Create DataFrame for display (without sorting columns)
         df_standings = pd.DataFrame(standings)[["Team", "Name", "Spiele", "W-L", "Punkte"]]
         st.dataframe(df_standings, hide_index=True)
+        # Printable version
+        if st.button("Druckversion Tabelle erstellen"):
+            html = """
+            <html>
+            <head>
+                <style>
+                    @page { size: A4; margin: 1cm; }
+                    body { font-family: Arial, sans-serif; }
+                    h2 { text-align: center; }
+                    table { border-collapse: collapse; margin: 0 auto; }
+                    th, td { border: 1px solid black; padding: 4px; word-wrap: break-word; }
+                    .platz { width: 1.5cm; text-align: center; }
+                    .team { width: 1.5cm; text-align: center; }
+                    .name { width: 8cm; }
+                    .spiele { width: 2cm; text-align: center; }
+                    .punkte { width: 3cm; text-align: center; }
+                </style>
+            </head>
+            <body>
+            """
+            html += "<h2>Tabelle Wattturnier SV Wörth 2025</h2>"
+            html += "<table><tr><th class='platz'>Platz</th><th class='team'>Team</th><th class='name'>Name</th><th class='spiele'>Spiele</th><th class='punkte'>Punkte</th></tr>"
+            
+            for platz, s in enumerate(standings, start=1):
+                html += f"<tr><td class='platz'>{platz}</td><td class='team'>{s['Team']}</td><td class='name'>{s['Name']}</td><td class='spiele'>{s['wins']}:{9 - s['wins']}</td><td class='punkte'>{s['pf']}:{s['pa']}</td></tr>"
+            
+            html += "</table></body></html>"
+            
+            st.download_button(
+                label="📄 HTML herunterladen",
+                data=html,
+                file_name="tabelle_wattturnier.html",
+                mime="text/html"
+            )
     else:
         st.write("Noch keine Daten vorhanden.")
