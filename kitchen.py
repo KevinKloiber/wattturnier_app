@@ -44,11 +44,12 @@ if open_orders:
                 st.write(f"🕐 {order['Zeit']}")
             with col2:
                 st.write(f"**{order['Bestellung']}**")
+                st.write(f"💰 {order['Preis']}")
             with col3:
                 if st.button("✅ Erledigt", key=f"done_{order['Order ID']}"):
                     # Find row and update status
                     cell = sheet.find(str(order['Order ID']))
-                    sheet.update_cell(cell.row, 5, "erledigt")
+                    sheet.update_cell(cell.row, 6, "erledigt")
                     st.rerun()
             st.divider()
 else:
