@@ -45,13 +45,12 @@ with tab1:
             points_for = 0
             points_against = 0
             
-            for m in st.session_state.matches:
+            for m in matches:
                 if "scores" not in m:
                     continue
                     
                 if m["team1"] == team_num:
                     for sub in m["scores"]:
-                        games_played += 1
                         points_for += sub[0]
                         points_against += sub[1]
                         if sub[0] == 15:
@@ -60,7 +59,6 @@ with tab1:
                             losses += 1
                 elif m["team2"] == team_num:
                     for sub in m["scores"]:
-                        games_played += 1
                         points_for += sub[1]
                         points_against += sub[0]
                         if sub[1] == 15:
