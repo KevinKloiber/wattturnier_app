@@ -76,7 +76,7 @@ with tab1:
             s["Platz"] = i + 1
         
         df_standings = pd.DataFrame(standings)[["Platz", "Team", "Name", "Spiele", "Punkte"]]
-        st.dataframe(df_standings, hide_index=True, use_container_width=True)
+        st.table(df_standings)
     else:
         st.write("Noch keine Daten vorhanden.")
 
@@ -119,13 +119,14 @@ with tab3:
     | Bier, Weißbier, Radler | 3,50 € |
     | Alkoholfreie Getränke | 3,00 € |
     | Kurze | 2,50 € |
+    | Rüscherl | 5,00 € |
+
     
     ### 🍕 Essen
     | Speise | Preis |
     |--------|-------|
     | Wurstsemmel | 3,00 € |
     | Pizzastück | 4,50 € |
-    | Rüscherl | 5,00 € |
     """)
     
     st.info("Bestellungen bitte an der Theke/Bedienung aufgeben!")
