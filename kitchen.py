@@ -3,10 +3,13 @@ import gspread
 import os
 from datetime import datetime
 
-st.set_page_config(page_title="Küche - Wattturnier", layout="wide")
 
+
+st.set_page_config(page_title="Ausschank - Wattturnier", layout="wide")
+
+# Auto-refresh every 30 seconds
 st.markdown("""
-    <meta http-equiv="refresh" content="60">
+    <meta http-equiv="refresh" content="30">
 """, unsafe_allow_html=True)
 
 def get_orders_sheet():
@@ -22,7 +25,7 @@ def get_orders_sheet():
     
     sh = gc.open("bestellungen_wt")
     return sh.sheet1
-st.title("🍳 Küche - Bestellungen")
+st.title("Ausschank - Bestellungen")
 
 # Refresh button
 if st.button("🔄 Aktualisieren"):
@@ -35,6 +38,20 @@ all_orders = sheet.get_all_records()
 # Split into open and done
 open_orders = [o for o in all_orders if o["Status"] == "offen"]
 done_orders = [o for o in all_orders if o["Status"] == "erledigt"]
+
+# Check for new orders and play sound
+if "last_order_count" not in st.session_state:
+    st.session_state.last_order_count = len(all_orders)
+
+if len(all_orders) > st.session_state.last_order_count:
+    st.markdown("""
+        <audio autoplay>
+            <source src="https://www.soundjay.com/buttons/beep-07a.mp3" type="audio/mpeg">
+        </audio>
+    """, unsafe_allow_html=True)
+    st.toast("🆕 Neue Bestellung!", icon="🔔")
+
+st.session_state.last_order_count = len(all_orders)
 
 # Display open orders
 st.subheader(f"📋 Offene Bestellungen ({len(open_orders)})")
