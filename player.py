@@ -239,8 +239,8 @@ with tab3:
             if salamisemmel > 0: items.append(f"{salamisemmel}x Salamisemmel")
             if leberkaesesemmel > 0: items.append(f"{leberkaesesemmel}x Leberkäsesemmel")
             if kaesesemmel > 0: items.append(f"{kaesesemmel}x Käsesemmel")
-            if pizza_salami > 0: items.append(f"{pizza_salami}x Pizza Salami")
-            if pizza_margherita > 0: items.append(f"{pizza_margherita}x Pizza Margherita")
+            if pizza_salami > 0: items.append(f"{pizza_salami}x Pizzastück Salami")
+            if pizza_margherita > 0: items.append(f"{pizza_margherita}x Pizzastück Margherita")
             
             if not items:
                 st.error("Bitte mindestens einen Artikel auswählen!")
