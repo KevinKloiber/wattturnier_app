@@ -4,6 +4,7 @@ import pandas as pd
 import gspread
 from datetime import datetime
 import os
+from datetime import timedelta
 
 def get_orders_sheet():
     try:
@@ -53,8 +54,8 @@ with tab1:
         standings = []
         
         for team_num, team in enumerate(teams, start=1):
-            name1 = f"{team['player1_last']} {team['player1_first'][0]}."
-            name2 = f"{team['player2_last']} {team['player2_first'][0]}."
+            name1 = f"{team['player1_last']} {team['player1_first'][0]}." if team['player1_first'].strip() else team['player1_last']
+            name2 = f"{team['player2_last']} {team['player2_first'][0]}." if team['player2_first'].strip() else team['player2_last']
             team_name = f"{name1} - {name2}"
             
             wins = 0
@@ -197,8 +198,8 @@ with tab3:
         leberkaesesemmel = st.number_input("Leberkäsesemmel (2,50€)", min_value=0, max_value=20, value=0, key="leberkaesesemmel")
         kaesesemmel = st.number_input("Käsesemmel (2,50€)", min_value=0, max_value=20, value=0, key="kaesesemmel")
     with col2:
-        pizza_salami = st.number_input("Pizza Salami (3,50€)", min_value=0, max_value=20, value=0, key="pizza_salami")
-        pizza_margherita = st.number_input("Pizza Margherita (3,50€)", min_value=0, max_value=20, value=0, key="pizza_margherita")
+        pizza_salami = st.number_input("Pizzastück Salami (3,50€)", min_value=0, max_value=20, value=0, key="pizza_salami")
+        pizza_margherita = st.number_input("Pizzastück Margherita (3,50€)", min_value=0, max_value=20, value=0, key="pizza_margherita")
     
     # Calculate total
     total = (helles * prices["helles"] + radler * prices["radler"] + 
@@ -247,8 +248,8 @@ with tab3:
                 sheet = get_orders_sheet()
                 order_id = len(sheet.get_all_values())
                 bestellung = ", ".join(items)
-                zeit = datetime.now().strftime("%H:%M:%S")
+                zeit = (datetime.now() + timedelta(hours=1)).strftime("%H:%M:%S")
                 preis = f"{total:.2f} €"
                 
                 sheet.append_row([order_id, tisch_nr, bestellung, zeit, preis, "offen"])
-                st.success("✅ Bestellung aufgegeben!")
+                st.toast("✅ Bestellung erfasst!", icon="🍺")

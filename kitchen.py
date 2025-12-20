@@ -5,6 +5,10 @@ from datetime import datetime
 
 st.set_page_config(page_title="Küche - Wattturnier", layout="wide")
 
+st.markdown("""
+    <meta http-equiv="refresh" content="60">
+""", unsafe_allow_html=True)
+
 def get_orders_sheet():
     try:
         # Try Streamlit Cloud secrets first

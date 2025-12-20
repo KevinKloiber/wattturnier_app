@@ -210,8 +210,8 @@ with tab5:
         
         for team_num, team in enumerate(st.session_state.teams, start=1):
             # Format team name: "Nachname V. - Nachname2 V2."
-            name1 = f"{team['player1_last']} {team['player1_first'][0]}."
-            name2 = f"{team['player2_last']} {team['player2_first'][0]}."
+            name1 = f"{team['player1_last']} {team['player1_first'][0]}." if team['player1_first'].strip() else team['player1_last']
+            name2 = f"{team['player2_last']} {team['player2_first'][0]}." if team['player2_first'].strip() else team['player2_last']
             team_name = f"{name1} - {name2}"
             
             # Calculate stats
