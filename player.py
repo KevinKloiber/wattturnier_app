@@ -252,4 +252,5 @@ with tab3:
                 preis = f"{total:.2f} €"
                 
                 sheet.append_row([order_id, tisch_nr, bestellung, zeit, preis, "offen"])
+                st.success("✅ Bestellung aufgegeben!")
                 st.toast("✅ Bestellung erfasst!", icon="🍺")
