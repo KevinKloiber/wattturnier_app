@@ -209,12 +209,10 @@ with tab5:
         standings = []
         
         for team_num, team in enumerate(st.session_state.teams, start=1):
-            # Format team name: "Nachname V. - Nachname2 V2."
             name1 = f"{team['player1_last']} {team['player1_first'][0]}." if team['player1_first'].strip() else team['player1_last']
             name2 = f"{team['player2_last']} {team['player2_first'][0]}." if team['player2_first'].strip() else team['player2_last']
             team_name = f"{name1} - {name2}"
             
-            # Calculate stats
             games_played = 0
             wins = 0
             losses = 0
@@ -251,17 +249,16 @@ with tab5:
                 "W-L": f"{wins}-{losses}",
                 "Punkte": f"{points_for}:{points_against}",
                 "wins": wins,
+                "losses": losses,
                 "pf": points_for,
                 "pa": points_against
             })
         
-        # Sort by wins (desc), then points_for (desc), then points_against (asc)
         standings.sort(key=lambda x: (-x["wins"], -x["pf"], x["pa"]))
         
-        # Create DataFrame for display (without sorting columns)
         df_standings = pd.DataFrame(standings)[["Team", "Name", "Spiele", "W-L", "Punkte"]]
         st.dataframe(df_standings, hide_index=True)
-        # Printable version
+        
         if st.button("Druckversion Tabelle erstellen"):
             html = """
             <html>
@@ -285,7 +282,7 @@ with tab5:
             html += "<table><tr><th class='platz'>Platz</th><th class='team'>Team</th><th class='name'>Name</th><th class='spiele'>Spiele</th><th class='punkte'>Punkte</th></tr>"
             
             for platz, s in enumerate(standings, start=1):
-                html += f"<tr><td class='platz'>{platz}</td><td class='team'>{s['Team']}</td><td class='name'>{s['Name']}</td><td class='spiele'>{s['wins']}:{9 - s['wins']}</td><td class='punkte'>{s['pf']}:{s['pa']}</td></tr>"
+                html += f"<tr><td class='platz'>{platz}</td><td class='team'>{s['Team']}</td><td class='name'>{s['Name']}</td><td class='spiele'>{s['wins']}:{s['losses']}</td><td class='punkte'>{s['pf']}:{s['pa']}</td></tr>"
             
             html += "</table></body></html>"
             
