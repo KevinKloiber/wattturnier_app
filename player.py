@@ -8,11 +8,9 @@ from datetime import timedelta
 
 def get_orders_sheet():
     try:
-        # Try Streamlit Cloud secrets first
         creds = st.secrets["gcp_service_account"]
         gc = gspread.service_account_from_dict(dict(creds))
     except:
-        # Fall back to local file
         script_dir = os.path.dirname(os.path.abspath(__file__))
         creds_path = os.path.join(script_dir, "credentials.json")
         gc = gspread.service_account(filename=creds_path)
@@ -22,7 +20,6 @@ def get_orders_sheet():
 
 st.set_page_config(page_title="Wattturnier", layout="centered")
 
-# Mobile-friendly styling
 st.markdown("""
     <style>
     .stButton > button { width: 100%; height: 50px; font-size: 18px; }
@@ -30,7 +27,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load data
 try:
     with open("teams.json", "r") as f:
         teams = json.load(f)
@@ -124,7 +120,9 @@ with tab2:
             if my_match:
                 opponent_num = my_match["team2"] if my_match["team1"] == team_num else my_match["team1"]
                 opponent = teams[opponent_num - 1]
-                opp_name = f"{opponent['player1_last']} {opponent['player1_first'][0]}. - {opponent['player2_last']} {opponent['player2_first'][0]}."
+                opp_name1 = f"{opponent['player1_last']} {opponent['player1_first'][0]}." if opponent['player1_first'].strip() else opponent['player1_last']
+                opp_name2 = f"{opponent['player2_last']} {opponent['player2_first'][0]}." if opponent['player2_first'].strip() else opponent['player2_last']
+                opp_name = f"{opp_name1} - {opp_name2}"
                 
                 st.success(f"🎯 Tisch {my_match['table']}")
                 st.info(f"Gegner: Team {opponent_num} — {opp_name}")
@@ -138,13 +136,12 @@ with tab3:
     
     tisch_nr = st.text_input("Tischnummer", "")
     
-    # Define prices
     prices = {
         "helles": 3.50, "radler": 3.50, "weissbier": 3.50, "weissbier_af": 3.50,
         "weinschorle_suess": 3.50, "weinschorle_sauer": 3.50,
         "spezi": 3.00, "apfelschorle": 3.00, "wasser": 2.50,
         "kaffee": 2.00,
-        "goassmass": 8.00, "ruescherl": 5.00, "schnaps_haselnuss": 3.00, 
+        "goassmass": 8.00, "goasshalbe": 4.00, "ruescherl": 5.00, "schnaps_haselnuss": 3.00, 
         "schnaps_willy": 3.00, "schnapsbrettl": 10.00,
         "salamisemmel": 2.50, "leberkaesesemmel": 2.50, "kaesesemmel": 2.50,
         "pizza_salami": 3.50, "pizza_margherita": 3.50
@@ -174,13 +171,13 @@ with tab3:
     col1, col2 = st.columns(2)
     with col1:
         goassmass = st.number_input("Goaßmaß (8,00€)", min_value=0, max_value=20, value=0, key="goassmass")
+        goasshalbe = st.number_input("Goaßhalbe (4,00€)", min_value=0, max_value=20, value=0, key="goasshalbe")
         ruescherl = st.number_input("Rüscherl (5,00€)", min_value=0, max_value=20, value=0, key="ruescherl")
-        schnaps_haselnuss = st.number_input("Schnaps Haselnuss (3,00€)", min_value=0, max_value=20, value=0, key="schnaps_haselnuss")
     with col2:
+        schnaps_haselnuss = st.number_input("Schnaps Haselnuss (3,00€)", min_value=0, max_value=20, value=0, key="schnaps_haselnuss")
         schnaps_willy = st.number_input("Schnaps Willy (3,00€)", min_value=0, max_value=20, value=0, key="schnaps_willy")
         schnapsbrettl = st.number_input("Schnapsbrettl 4x2cl (10,00€)", min_value=0, max_value=10, value=0, key="schnapsbrettl")
     
-    # Schnapsbrettl combination selector
     brettl_combo = None
     if schnapsbrettl > 0:
         brettl_combo = st.selectbox("Schnapsbrettl Kombination:", [
@@ -201,14 +198,13 @@ with tab3:
         pizza_salami = st.number_input("Pizzastück Salami (3,50€)", min_value=0, max_value=20, value=0, key="pizza_salami")
         pizza_margherita = st.number_input("Pizzastück Margherita (3,50€)", min_value=0, max_value=20, value=0, key="pizza_margherita")
     
-    # Calculate total
     total = (helles * prices["helles"] + radler * prices["radler"] + 
              weissbier * prices["weissbier"] + weissbier_af * prices["weissbier_af"] +
              weinschorle_suess * prices["weinschorle_suess"] + weinschorle_sauer * prices["weinschorle_sauer"] +
              spezi * prices["spezi"] + apfelschorle * prices["apfelschorle"] + wasser * prices["wasser"] +
-             kaffee * prices["kaffee"] + goassmass * prices["goassmass"] + ruescherl * prices["ruescherl"] +
-             schnaps_haselnuss * prices["schnaps_haselnuss"] + schnaps_willy * prices["schnaps_willy"] +
-             schnapsbrettl * prices["schnapsbrettl"] +
+             kaffee * prices["kaffee"] + goassmass * prices["goassmass"] + goasshalbe * prices["goasshalbe"] +
+             ruescherl * prices["ruescherl"] + schnaps_haselnuss * prices["schnaps_haselnuss"] + 
+             schnaps_willy * prices["schnaps_willy"] + schnapsbrettl * prices["schnapsbrettl"] +
              salamisemmel * prices["salamisemmel"] + leberkaesesemmel * prices["leberkaesesemmel"] +
              kaesesemmel * prices["kaesesemmel"] + pizza_salami * prices["pizza_salami"] + 
              pizza_margherita * prices["pizza_margherita"])
@@ -232,6 +228,7 @@ with tab3:
             if wasser > 0: items.append(f"{wasser}x Wasser")
             if kaffee > 0: items.append(f"{kaffee}x Kaffee")
             if goassmass > 0: items.append(f"{goassmass}x Goaßmaß")
+            if goasshalbe > 0: items.append(f"{goasshalbe}x Goaßhalbe")
             if ruescherl > 0: items.append(f"{ruescherl}x Rüscherl")
             if schnaps_haselnuss > 0: items.append(f"{schnaps_haselnuss}x Schnaps Haselnuss")
             if schnaps_willy > 0: items.append(f"{schnaps_willy}x Schnaps Willy")
